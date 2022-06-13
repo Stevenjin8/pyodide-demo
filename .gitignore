@@ -1,0 +1,7 @@
+.DS_Store
+/dist
+.env
+/secrets
+**secret**
+node_modules
+/.venv

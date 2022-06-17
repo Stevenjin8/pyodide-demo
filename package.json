@@ -23,6 +23,7 @@
     "@azure/arm-resources": "^5.0.1",
     "@azure/identity": "^2.0.5",
     "lodash": "^4.17.21",
+    "msal": "^1.4.16",
     "pyodide": "^0.20.0"
   },
   "prettier": {

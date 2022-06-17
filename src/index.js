@@ -10,7 +10,8 @@ const code = document.getElementById('code');
 const select = document.getElementById('example');
 const run = document.getElementById('run');
 const clear = document.getElementById('clear');
-const buttons = [select, run, clear];
+const file_upload = document.getElementById('file-upload');
+const buttons = [select, run, clear, file_upload];
 const EXAMPLES = getExamples();
 
 /**
@@ -23,7 +24,6 @@ async function init(pyodide) {
   await pyodide.runPythonAsync(transportPy);
   await pyodide.runPythonAsync(createClientPy);
   await pyodide.runPythonAsync(`client = await create_client()`);
-  updateExample();
 }
 
 /**
@@ -48,8 +48,12 @@ function disableButtons() {
  * Add formatted multi-line code to the output.
  */
 function addToOutput(s) {
-  let consoleCode = code.value.split('\n').join('\n... ');
-  output.value += '>>> ' + consoleCode + '\n' + s + '\n';
+  let consoleCode = code.value.trim().split('\n').join('\n... ');
+  output.value += '>>> ' + consoleCode + '\n';
+  if (typeof s !== 'undefined') {
+    output.value += s + '\n';
+  }
+
   // Scrolls the output to the bottom.
   output.scrollTop = output.scrollHeight;
 }

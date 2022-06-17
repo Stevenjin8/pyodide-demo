@@ -33,3 +33,8 @@ async def create_client():
         credential=AzureKeyCredential(az_key),
         transport=PyodideTransport(),
     )
+
+"""
+bytes = (await js.document.getElementById("file-upload").files.object_values()[0].stream().getReader().read()).value
+type(bytes.to_bytes())
+"""

@@ -7,7 +7,7 @@ import micropip
 AZ_KEY = None
 AZ_ENDPOINT = None
 
-PACKAGES = ["azure-ai-textanalytics", "python-dotenv"]
+PACKAGES = ["azure-ai-textanalytics", "python-dotenv", "azure-ai-formrecognizer"]
 
 # Install packages
 async def load_packages():

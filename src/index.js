@@ -14,16 +14,33 @@ const file_upload = document.getElementById('file-upload');
 const buttons = [select, run, clear, file_upload];
 const EXAMPLES = getExamples();
 
+function readFileAsync(file) {
+  return new Promise((resolve, reject) => {
+    let reader = new FileReader();
+
+    reader.onload = () => {
+      resolve(reader.result);
+    };
+
+    reader.onerror = reject;
+
+    reader.readAsArrayBuffer(file);
+  });
+}
+
 /**
  * Initialize python environment and create the client
  */
 async function init(pyodide) {
+  pyodide.registerJsModule('js_file', { readFileAsync });
   await pyodide.loadPackage('micropip');
   await pyodide.runPythonAsync(initPy);
   await pyodide.globals.get('load_packages')();
   await pyodide.runPythonAsync(transportPy);
   await pyodide.runPythonAsync(createClientPy);
-  await pyodide.runPythonAsync(`client = await create_client()`);
+  await pyodide.runPythonAsync(
+    `textanalytics_client, formrecognizer_client = await create_clients()`,
+  );
 }
 
 /**

@@ -1,7 +1,9 @@
+from typing import Tuple
 import js
 import os
 from pyodide.http import pyfetch
 from azure.ai.textanalytics.aio import TextAnalyticsClient
+from azure.ai.formrecognizer.aio import FormRecognizerClient
 from azure.core.credentials import AzureKeyCredential
 
 
@@ -25,14 +27,22 @@ async def load_credentials():
     return az_key, az_endpoint
 
 
-async def create_client():
-    az_key, az_endpoint = await load_credentials()
-    print(az_key, az_endpoint)
-    return TextAnalyticsClient(
-        endpoint=az_endpoint,
-        credential=AzureKeyCredential(az_key),
+async def create_clients() -> Tuple[TextAnalyticsClient, FormRecognizerClient]:
+    az_textanalytics_key, az_textanalytics_endpoint = await load_credentials()
+    az_form_recognizer_key = os.environ["AZ_FORM_RECOGNIZER_KEY"]
+    az_form_recognizer_endpoint = os.environ["AZ_FORM_RECOGNIZER_ENDPOINT"]
+    textanalytics_client = TextAnalyticsClient(
+        endpoint=az_textanalytics_endpoint,
+        credential=AzureKeyCredential(az_textanalytics_key),
         transport=PyodideTransport(),
     )
+    formrecognizer_client = FormRecognizerClient(
+        endpoint=az_form_recognizer_endpoint,
+        credential=AzureKeyCredential(az_form_recognizer_key),
+        transport=PyodideTransport(),
+    )
+    return textanalytics_client, formrecognizer_client
+
 
 """
 bytes = (await js.document.getElementById("file-upload").files.object_values()[0].stream().getReader().read()).value

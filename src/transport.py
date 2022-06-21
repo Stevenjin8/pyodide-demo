@@ -14,7 +14,7 @@ class PyodideTransport(AsyncioRequestsTransport):
         :param request: The request object to be sent.
         :type request: ~azure.core.pipeline.transport.HttpRequest
         :return: An HTTPResponse object.
-        :rtype: ~azure.core.pipeline.transport.HttpResponse
+        :rtype: PyodideResponseTransport
         """
         endpoint = request.url
         request_headers = dict(request.headers)
@@ -48,14 +48,17 @@ class PyodideTransport(AsyncioRequestsTransport):
 class PyodideTransportResponse(AsyncHttpResponseImpl):
     async def close(self):
         """This is kinda weird but AsyncHttpResponseImpl assumed that
-        the internal response is a requests.Reponse object (I think).
+        the internal response is a `requests.Reponse` object (I think).
         """
         self._is_closed = True
 
 
 class PyodideStreamDownloadGenerator(AsyncIterator):
     """Simple stream download generator that returns the contents of
-    a request."""
+    a request.
+
+    TODO: support paging (?) or like actually doing stream downloading.
+    """
 
     def __init__(self, response: PyodideTransportResponse, **__) -> None:
         self.request = response.request

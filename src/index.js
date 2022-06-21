@@ -14,6 +14,10 @@ const file_upload = document.getElementById('file-upload');
 const buttons = [select, run, clear, file_upload];
 const EXAMPLES = getExamples();
 
+/**
+ * Read the bytes of a file. See
+ * https://stackoverflow.com/questions/34495796/javascript-promises-with-filereader
+ */
 function readFileAsync(file) {
   return new Promise((resolve, reject) => {
     let reader = new FileReader();
@@ -28,6 +32,17 @@ function readFileAsync(file) {
   });
 }
 
+async function runPythonConsole(pyodide, code, options) {
+  const output_file = pyodide.globals.get('_CONSOLE_IO');
+  const pos = output_file.tell();
+  const output = await pyodide.runPythonAsync(code, options);
+  if (output) {
+    output_file.write(output + '\n');
+  }
+  output_file.seek(pos);
+  return output_file.read();
+}
+
 /**
  * Initialize python environment and create the client
  */
@@ -39,7 +54,7 @@ async function init(pyodide) {
   await pyodide.runPythonAsync(transportPy);
   await pyodide.runPythonAsync(createClientPy);
   await pyodide.runPythonAsync(
-    `textanalytics_client, formrecognizer_client = await create_clients()`,
+    `textanalytics_client, form_recognizer_client = await create_clients()`,
   );
 }
 
@@ -91,12 +106,13 @@ async function main() {
 }
 
 let pyodideReadyPromise = main();
+window.pyodideReadyPromise = pyodideReadyPromise;
 
 async function evaluatePython() {
   disableButtons();
   let pyodide = await pyodideReadyPromise;
   try {
-    let output = await pyodide.runPythonAsync(code.value);
+    let output = await runPythonConsole(pyodide, code.value);
     addToOutput(output);
   } catch (err) {
     addToOutput(err);

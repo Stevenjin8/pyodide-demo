@@ -7,9 +7,17 @@ from azure.ai.formrecognizer.aio import FormRecognizerClient
 from azure.core.credentials import AzureKeyCredential
 
 
-async def load_credentials():
+async def load_credentials(
+    env_endpoint: str = "http://localhost:8000/.env",
+) -> Tuple[str, ...]:
+    """Try to load keys and endpoints for azure resources.
+    First, look for a `.env` file in `http://localhost:8000/.env`
+    (this is mostly for rapid development). If anything fails, prompt the
+    user for these values.
+    """
     try:
-        response = await pyfetch("http://localhost:8000/.env")
+        # Might be better to just parse it straight up?
+        response = await pyfetch(env_endpoint)
         with open(".env", "wb") as f:
             f.write(await response.bytes())
 
@@ -18,33 +26,47 @@ async def load_credentials():
         from dotenv import load_dotenv
 
         load_dotenv()
-        az_key = os.getenv("AZ_KEY1")
-        az_endpoint = os.getenv("AZ_ENDPOINT")
+        textanalytics_key = os.getenv("AZ_TEXTANALYTICS_KEY")
+        textanalytics_endpoint = os.getenv("AZ_TEXTANALYTICS_ENDPOINT")
+
+        form_recognizer_key = os.getenv("AZ_FORM_RECOGNIZER_KEY")
+        form_recognizer_endpoint = os.getenv("AZ_FORM_RECOGNIZER_ENDPOINT")
     except Exception as e:
         print(e)
-        az_key = js.prompt("Please enter your textanalytics key: ")
-        az_endpoint = js.prompt("Please enter your textanalytics endpoint: ")
-    return az_key, az_endpoint
+        textanalytics_key = js.prompt("Please enter your textanalytics key: ")
+        textanalytics_endpoint = js.prompt("Please enter your textanalytics endpoint: ")
+        form_recognizer_key = js.prompt("Please enter your form recognizer key: ")
+        form_recognizer_endpoint = js.prompt(
+            "Please enter your form recognizer endpoint: "
+        )
+    return (
+        textanalytics_key,
+        textanalytics_endpoint,
+        form_recognizer_key,
+        form_recognizer_endpoint,
+    )
 
 
 async def create_clients() -> Tuple[TextAnalyticsClient, FormRecognizerClient]:
-    az_textanalytics_key, az_textanalytics_endpoint = await load_credentials()
-    az_form_recognizer_key = os.environ["AZ_FORM_RECOGNIZER_KEY"]
-    az_form_recognizer_endpoint = os.environ["AZ_FORM_RECOGNIZER_ENDPOINT"]
+    """Create a `TextAnalytics` and a `FormRecognizer` clients in the global Python
+    scope with the `PyodideTransport` transport.
+    """
+    (
+        textanalytics_key,
+        textanalytics_endpoint,
+        form_recognizer_key,
+        form_recognizer_endpoint,
+    ) = await load_credentials()
+    print("TA key is", textanalytics_key)
+
     textanalytics_client = TextAnalyticsClient(
-        endpoint=az_textanalytics_endpoint,
-        credential=AzureKeyCredential(az_textanalytics_key),
+        endpoint=textanalytics_endpoint,
+        credential=AzureKeyCredential(textanalytics_key),
         transport=PyodideTransport(),
     )
-    formrecognizer_client = FormRecognizerClient(
-        endpoint=az_form_recognizer_endpoint,
-        credential=AzureKeyCredential(az_form_recognizer_key),
+    form_recognizer_client = FormRecognizerClient(
+        endpoint=form_recognizer_endpoint,
+        credential=AzureKeyCredential(form_recognizer_key),
         transport=PyodideTransport(),
     )
-    return textanalytics_client, formrecognizer_client
-
-
-"""
-bytes = (await js.document.getElementById("file-upload").files.object_values()[0].stream().getReader().read()).value
-type(bytes.to_bytes())
-"""
+    return textanalytics_client, form_recognizer_client

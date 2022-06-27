@@ -26,47 +26,30 @@ async def load_credentials(
         from dotenv import load_dotenv
 
         load_dotenv()
-        textanalytics_key = os.getenv("AZ_TEXTANALYTICS_KEY")
-        textanalytics_endpoint = os.getenv("AZ_TEXTANALYTICS_ENDPOINT")
-
-        form_recognizer_key = os.getenv("AZ_FORM_RECOGNIZER_KEY")
-        form_recognizer_endpoint = os.getenv("AZ_FORM_RECOGNIZER_ENDPOINT")
+        key = os.getenv("AZ_TEXTANALYTICS_KEY")
+        endpoint = os.getenv("AZ_TEXTANALYTICS_ENDPOINT")
     except Exception as e:
-        print(e)
-        textanalytics_key = js.prompt("Please enter your textanalytics key: ")
-        textanalytics_endpoint = js.prompt("Please enter your textanalytics endpoint: ")
-        form_recognizer_key = js.prompt("Please enter your form recognizer key: ")
-        form_recognizer_endpoint = js.prompt(
-            "Please enter your form recognizer endpoint: "
-        )
-    return (
-        textanalytics_key,
-        textanalytics_endpoint,
-        form_recognizer_key,
-        form_recognizer_endpoint,
-    )
+        key = js.getElementById("key").value
+        endpoint = js.getElementById("endpoint").value
+    return (key, endpoint)
 
 
-async def create_clients() -> Tuple[TextAnalyticsClient, FormRecognizerClient]:
-    """Create a `TextAnalytics` and a `FormRecognizer` clients in the global Python
-    scope with the `PyodideTransport` transport.
-    """
-    (
-        textanalytics_key,
-        textanalytics_endpoint,
-        form_recognizer_key,
-        form_recognizer_endpoint,
-    ) = await load_credentials()
-    print("TA key is", textanalytics_key)
+# async def create_clients() -> Tuple[TextAnalyticsClient, FormRecognizerClient]:
+#     """Create a `TextAnalytics` and a `FormRecognizer` clients in the global Python
+#     scope with the `PyodideTransport` transport.
+#     """
 
-    textanalytics_client = TextAnalyticsClient(
-        endpoint=textanalytics_endpoint,
-        credential=AzureKeyCredential(textanalytics_key),
-        transport=PyodideTransport(),
-    )
-    form_recognizer_client = FormRecognizerClient(
-        endpoint=form_recognizer_endpoint,
-        credential=AzureKeyCredential(form_recognizer_key),
-        transport=PyodideTransport(),
-    )
-    return textanalytics_client, form_recognizer_client
+#     credential = AzureKeyCredential(key)
+#     kwargs = {"endpoint": endpoint, "credential": credential, "transport": PyodideTransport()}
+
+#     textanalytics_client = TextAnalyticsClient(
+#         endpoint=textanalytics_endpoint,
+#         credential=AzureKeyCredential(textanalytics_key),
+#         transport=PyodideTransport(),
+#     )
+#     form_recognizer_client = FormRecognizerClient(
+#         endpoint=form_recognizer_endpoint,
+#         credential=AzureKeyCredential(form_recognizer_key),
+#         transport=PyodideTransport(),
+#     )
+#     return textanalytics_client, form_recognizer_client

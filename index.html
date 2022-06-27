@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <meta charset="UTF-8" />
     <script
       src="https://cdn.jsdelivr.net/pyodide/v0.20.0/full/pyodide.js"
       defer
@@ -11,9 +12,47 @@
   <body>
     <p>
       You can execute any Python code. Just enter something in the box below and
-      click the button. Note that print statements go to the console, not the
-      output.
+      click the button. To play around with a <code>TextAnalytics</code> or
+      <code>FormRecognizer</code> client, enter you resource key and endpoint
+      and select your resource type. Then, press <code>create client</code>.
+      Then client will be available under the <code>client</code> variable.
     </p>
+    <p>To see an example, choose an example from the examples dropdown.</p>
+    <p>
+      To access files in your local file system, you must first upload to the
+      virtual file system. For example, if you have a file named
+      <code>receipt.jpeg</code>
+      on your computer, select it using the Choose Files input and press press
+      upload. Now, you can access the file as if it were in your working
+      directory. See the Recognize Receipt example.
+    </p>
+    <p>
+      See
+      <a
+        href="https://ms.portal.azure.com/#create/Microsoft.CognitiveServicesTextAnalytics"
+        >this</a
+      >
+      link to create a Text Analytics resource and
+      <a
+        href="https://ms.portal.azure.com/#create/Microsoft.CognitiveServicesFormRecognizer"
+        >here</a
+      >
+      to create a Form Recognizer resource. You can find the key and endpoint
+      under the "Keys and Endpoint" tab of each resource.
+    </p>
+
+    <label for="key">Key: </label>
+    <input type="password" id="key" class="user-input" disabled />
+    <label for="endpoint">Endpoint: </label>
+    <input class="user-input" type="text" id="endpoint" disabled />
+    <select name="client" id="client" class="user-input" disabled>
+      <option value="FormRecognizerClient">Form Recognizer</option>
+      <option value="TextAnalyticsClient">Text Analytics</option>
+    </select>
+    <button class="user-input" onclick="createClient()" disabled>
+      Create Client
+    </button>
+    <br />
     <textarea
       id="code"
       spellcheck="false"
@@ -21,15 +60,26 @@
       rows="3"
     ></textarea>
     <br />
-    <button id="run" onclick="evaluatePython()" disabled>Run</button>
-    <button id="clear" onclick="clearConsole()" disabled>Clear Output</button>
+    <button id="run" class="user-input" onclick="evaluatePython()" disabled>
+      Run
+    </button>
+    <button id="clear" class="user-input" onclick="clearConsole()" disabled>
+      Clear Output
+    </button>
     <label for="example">Example: </label>
-    <select name="example" id="example" onchange="updateExample()" disabled>
+    <select
+      name="example"
+      class="user-input"
+      id="example"
+      onchange="updateExample()"
+      disabled
+    >
       <option value="sentimentAnalysis">Sentiment Analysis</option>
       <option value="languageDetection">Language Detection</option>
       <option value="health">Health</option>
     </select>
-    <input type="file" id="file-upload" disabled />
+    <input type="file" class="user-input" id="file-upload" disabled multiple />
+    <button id="upload" class="user-input" disabled>Upload</button>
 
     <br />
     <br />

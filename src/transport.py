@@ -1,6 +1,5 @@
+from requests.structures import CaseInsensitiveDict
 from collections.abc import AsyncIterator
-from azure.ai.textanalytics.aio import TextAnalyticsClient
-from azure.core.credentials import AzureKeyCredential
 from azure.core.pipeline.transport._requests_asyncio import AsyncioRequestsTransport
 from azure.core.rest._http_response_impl_async import AsyncHttpResponseImpl
 
@@ -24,13 +23,13 @@ class PyodideTransport(AsyncioRequestsTransport):
             "body": request.data,
             "files": request.files,
             "verify": kwargs.pop("connection_verify", self.connection_config.verify),
-            # "timeout": timeout,
             "cert": kwargs.pop("connection_cert", self.connection_config.cert),
             "allow_redirects": False,
+            "keepalive": False,
             **kwargs,
         }
         response = await pyfetch(endpoint, **init)
-        headers = dict(response.js_response.headers)
+        headers = CaseInsensitiveDict(response.js_response.headers)
         res = PyodideTransportResponse(
             request=request,
             internal_response=response,
@@ -52,6 +51,10 @@ class PyodideTransportResponse(AsyncHttpResponseImpl):
         """
         self._is_closed = True
 
+    async def load_body(self):
+        if self._content is None:
+            self._content = await self.internal_response.bytes()
+
 
 class PyodideStreamDownloadGenerator(AsyncIterator):
     """Simple stream download generator that returns the contents of
@@ -60,7 +63,9 @@ class PyodideStreamDownloadGenerator(AsyncIterator):
     TODO: support paging (?) or like actually doing stream downloading.
     """
 
-    def __init__(self, response: PyodideTransportResponse, **__) -> None:
+    def __init__(self, pipeline, response: PyodideTransportResponse, **__) -> None:
+        self.pipeline = pipeline
+        self.block_size = response.block_size
         self.request = response.request
         self.response = response
         self.done = False

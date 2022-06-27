@@ -103,6 +103,13 @@ for doc in result:
         print("\\tLength: {}".format(entity.length), file=output_file)
 output_file.seek(0)
 output_file.read().strip()`,
+  analyzeReceipts: `
+with open("receipt.jpeg", "rb") as f:
+    bytes = f.read()
+poller = await client.begin_recognize_receipts(bytes)
+result = (await poller.result())[0]
+for k, v in result.fields.items():
+    print(k, ":", v.value_data.text if v.value_data else "-")`,
 };
 
 export default function getExamples() {

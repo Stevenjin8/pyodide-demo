@@ -11,7 +11,8 @@ const select = document.getElementById('example');
 const run = document.getElementById('run');
 const clear = document.getElementById('clear');
 const file_upload = document.getElementById('file-upload');
-const buttons = [select, run, clear, file_upload];
+const upload = document.getElementById('upload');
+const buttons = document.getElementsByClassName('user-input');
 const EXAMPLES = getExamples();
 
 /**
@@ -32,17 +33,15 @@ function readFileAsync(file) {
   });
 }
 
-async function runPythonConsole(pyodide, code, options) {
-  const output_file = pyodide.globals.get('_CONSOLE_IO');
-  const pos = output_file.tell();
-  const output = await pyodide.runPythonAsync(code, options);
-  if (output) {
-    output_file.write(output + '\n');
-  }
-  output_file.seek(pos);
-  return output_file.read();
+async function createClient() {
+  const pyodide = await pyodideReadyPromise;
+  const key = document.getElementById('key').value;
+  const endpoint = document.getElementById('endpoint').value;
+  const client = document.getElementById('client').value;
+  let py = `client = ${client}(endpoint="${endpoint}", credential=AzureKeyCredential("${key}"), transport=PyodideTransport())`;
+  console.log(py);
+  await pyodide.runPythonAsync(py);
 }
-
 /**
  * Initialize python environment and create the client
  */
@@ -53,9 +52,6 @@ async function init(pyodide) {
   await pyodide.globals.get('load_packages')();
   await pyodide.runPythonAsync(transportPy);
   await pyodide.runPythonAsync(createClientPy);
-  await pyodide.runPythonAsync(
-    `textanalytics_client, form_recognizer_client = await create_clients()`,
-  );
 }
 
 /**
@@ -76,12 +72,15 @@ function disableButtons() {
   }
 }
 
+function addCodeToOutput(code) {
+  let consoleCode = code.trim().split('\n').join('\n... ');
+  output.value += '>>> ' + consoleCode + '\n';
+}
+
 /**
  * Add formatted multi-line code to the output.
  */
 function addToOutput(s) {
-  let consoleCode = code.value.trim().split('\n').join('\n... ');
-  output.value += '>>> ' + consoleCode + '\n';
   if (typeof s !== 'undefined') {
     output.value += s + '\n';
   }
@@ -98,21 +97,27 @@ function clearConsole() {
 }
 
 async function main() {
-  let pyodide = await loadPyodide();
+  let pyodide = await loadPyodide({
+    stdout: (x) => (output.value += x + '\n'),
+    stderr: (x) => (output.value += x + '\n'),
+  });
   await init(pyodide);
   enableButtons();
   output.value += 'Ready!\n';
+  upload.onclick = pyodide.globals.get('save_files');
+
   return pyodide;
 }
 
-let pyodideReadyPromise = main();
+const pyodideReadyPromise = main();
 window.pyodideReadyPromise = pyodideReadyPromise;
 
 async function evaluatePython() {
   disableButtons();
   let pyodide = await pyodideReadyPromise;
   try {
-    let output = await runPythonConsole(pyodide, code.value);
+    addCodeToOutput(code.value);
+    const output = await pyodide.runPythonAsync(code.value);
     addToOutput(output);
   } catch (err) {
     addToOutput(err);
@@ -129,6 +134,24 @@ function updateExample() {
   code.setAttribute('rows', EXAMPLES[key].split(/\r\n|\r|\n/).length);
 }
 
+window.addToOutput = addToOutput;
 window.updateExample = updateExample;
 window.evaluatePython = evaluatePython;
 window.clearConsole = clearConsole;
+window.createClient = createClient;
+
+// See https://stackoverflow.com/questions/6637341/use-tab-to-indent-in-textarea
+document.getElementById('code').addEventListener('keydown', function (e) {
+  if (e.key == 'Tab') {
+    e.preventDefault();
+    var start = this.selectionStart;
+    var end = this.selectionEnd;
+
+    // set textarea value to: text before caret + tab + text after caret
+    this.value =
+      this.value.substring(0, start) + '    ' + this.value.substring(end);
+
+    // put caret at right position again
+    this.selectionStart = this.selectionEnd = start + 4;
+  }
+});

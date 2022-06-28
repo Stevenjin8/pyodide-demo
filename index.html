@@ -45,9 +45,11 @@
     <input type="password" id="key" class="user-input" disabled />
     <label for="endpoint">Endpoint: </label>
     <input class="user-input" type="text" id="endpoint" disabled />
-    <select name="client" id="client" class="user-input" disabled>
-      <option value="FormRecognizerClient">Form Recognizer</option>
-      <option value="TextAnalyticsClient">Text Analytics</option>
+    <label for="client-type">Client type: </label>
+    <select name="client-type" id="client-type" class="user-input" disabled>
+      <option value="form-recognizer">Form Recognizer</option>
+      <option value="text-analytics">Text Analytics</option>
+      <option value="blob-storage">Blob Storage</option>
     </select>
     <button class="user-input" id="create-client" disabled>
       Create Client
@@ -64,16 +66,13 @@
     <button id="run" class="user-input" disabled>Run</button>
     <button id="clear" class="user-input" disabled>Clear Output</button>
     <label for="example">Example: </label>
-    <select
-      name="example"
-      class="user-input"
-      id="example"
-      onchange="updateExample()"
-      disabled
-    >
+    <select name="example" class="user-input" id="example" disabled>
       <option value="sentimentAnalysis">Sentiment Analysis</option>
       <option value="languageDetection">Language Detection</option>
       <option value="health">Health</option>
+      <option value="pii">PII</option>
+      <option value="receipts">Form Recognizer</option>
+      <option value="storage">Blob Storage</option>
     </select>
     <input type="file" class="user-input" id="file-upload" disabled multiple />
     <button id="upload" class="user-input" disabled>Upload</button>

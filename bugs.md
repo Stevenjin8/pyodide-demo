@@ -1,0 +1,1 @@
+- `BlobServiceClient` can take a key (in string form) as its credential, but it cannot take an `AzureKeyCredentials` object.

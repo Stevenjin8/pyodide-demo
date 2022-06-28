@@ -1,17 +1,24 @@
 # pyright: reportMissingImports=false, reportUndefinedVariable=false
-# pylint: disable=import-error
+# pylint: disable=import-error, no-name-in-module
 import js
 import pyodide
+from azure.ai.formrecognizer.aio import FormRecognizerClient
 from azure.ai.textanalytics.aio import TextAnalyticsClient
 from azure.core.credentials import AzureKeyCredential
+from azure.storage.blob.aio import BlobServiceClient
 
+from examples import EXAMPLES
+
+EXAMPLES = EXAMPLES.to_py()
 get_element_by_id = js.document.getElementById
 USER_INPUT_CLASS_NAME = "user-input"
 CONSOLE_OUTPUT = get_element_by_id("output")
-CONSOLE_INPUT = get_element_by_id("code")
+CODE = get_element_by_id("code")
 KEY_INPUT = get_element_by_id("key")
 ENDPOINT_INPUT = get_element_by_id("endpoint")
+CLIENT_TYPE_SELECT = get_element_by_id("client-type")
 FILE_UPLOAD = get_element_by_id("file-upload")
+EXAMPLE_SELECT = get_element_by_id("example")
 
 client = None  # pylint: disable=invalid-name
 
@@ -69,7 +76,7 @@ def clear_console_output(*_):
 async def evaluate_python(*_):
     """Evaluates code form the code input and writes to console output."""
     toggle_inputs(True)
-    code = CONSOLE_INPUT.value
+    code = CODE.value
     add_code_to_console_output(code)
     try:
         content = await pyodide.eval_code_async(code, globals=globals())
@@ -86,25 +93,52 @@ async def create_client(*_):
     """
     key = KEY_INPUT.value
     endpoint = ENDPOINT_INPUT.value
+    client_type = CLIENT_TYPE_SELECT.value
 
     global client  # pylint: disable=invalid-name, global-statement
-    client = TextAnalyticsClient(
-        endpoint=endpoint,
-        credential=AzureKeyCredential(key),
-        transport=PyodideTransport(),  # pylint: disable=undefined-variable
-    )
+    if client_type == "text-analytics":
+        client = TextAnalyticsClient(
+            endpoint=endpoint,
+            credential=AzureKeyCredential(key),
+            transport=PyodideTransport(),  # pylint: disable=undefined-variable
+        )
+        print_to_console_output("TextAnalytics client created successfully!")
+    elif client_type == "form-recognizer":
+        client = FormRecognizerClient(
+            endpoint=endpoint,
+            credential=AzureKeyCredential(key),
+            transport=PyodideTransport(),  # pylint: disable=undefined-variable
+        )
+        print_to_console_output("FormRecognizer client created successfully!")
+    elif client_type == "blob-storage":
+        client = BlobServiceClient(
+            account_url=endpoint,
+            credential=key,
+            transport=PyodideTransport(),  # pylint: disable=undefined-variable
+        )
+        print_to_console_output("BlobService client created successfully!")
+    else:
+        raise Exception(f"{client_type} is not a valid client type.")
 
 
 def tab_listener(event, tab_size=4):
-    """So pressing <Tab> creates four spaces. Inspired by
-    https://stackoverflow.com/questions/6637341/use-tab-to-indent-in-textarea"""
+    """So pressing <Tab> creates four spaces in the code input. Inspired by
+    https://stackoverflow.com/questions/6637341/use-tab-to-indent-in-textarea
+    """
     this = event.currentTarget
     if event.key == "Tab":
         event.preventDefault()
         start = this.selectionStart
         end = this.selectionEnd
-        this.value = this.value[0:start] + " " * tab_size + this.value[end:]
+        this.value = this.value[:start] + " " * tab_size + this.value[end:]
         this.selectionStart = this.selectionEnd = start + tab_size
+
+
+def update_example(*_):
+    """Put example code into the code input."""
+    example_name = EXAMPLE_SELECT.value
+    if example_name:
+        CODE.value = EXAMPLES[example_name]
 
 
 # Add events to DOM elements.
@@ -115,3 +149,4 @@ get_element_by_id("run").onclick = evaluate_python
 get_element_by_id("clear").onclick = clear_console_output
 get_element_by_id("upload").onclick = save_files
 get_element_by_id("create-client").onclick = create_client
+EXAMPLE_SELECT.onchange = update_example

@@ -1,7 +1,10 @@
-from requests.structures import CaseInsensitiveDict
+# pyright: reportMissingImports=false
 from collections.abc import AsyncIterator
+
 from azure.core.pipeline.transport._requests_asyncio import AsyncioRequestsTransport
 from azure.core.rest._http_response_impl_async import AsyncHttpResponseImpl
+from pyodide.http import pyfetch  # pylint: disable=import-error
+from requests.structures import CaseInsensitiveDict
 
 
 class PyodideTransport(AsyncioRequestsTransport):

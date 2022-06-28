@@ -49,23 +49,20 @@
       <option value="FormRecognizerClient">Form Recognizer</option>
       <option value="TextAnalyticsClient">Text Analytics</option>
     </select>
-    <button class="user-input" onclick="createClient()" disabled>
+    <button class="user-input" id="create-client" disabled>
       Create Client
     </button>
     <br />
     <textarea
       id="code"
+      class="user-input"
       spellcheck="false"
       style="width: 100%"
       rows="3"
     ></textarea>
     <br />
-    <button id="run" class="user-input" onclick="evaluatePython()" disabled>
-      Run
-    </button>
-    <button id="clear" class="user-input" onclick="clearConsole()" disabled>
-      Clear Output
-    </button>
+    <button id="run" class="user-input" disabled>Run</button>
+    <button id="clear" class="user-input" disabled>Clear Output</button>
     <label for="example">Example: </label>
     <select
       name="example"

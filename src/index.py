@@ -26,7 +26,8 @@ client = None  # pylint: disable=invalid-name
 def read_file_async(file):
     """Return a promise that resolves to the contents of a file.
     See:
-    https://stackoverflow.com/questions/34495796/javascript-promises-with-filereader"""
+    https://stackoverflow.com/questions/34495796/javascript-promises-with-filereader
+    """
 
     def callback(resolve, reject):
         reader = js.FileReader.new()
@@ -43,7 +44,7 @@ async def save_files(*_):
     for file in files:
         with open(file.name, "wb") as f:
             f.write((await read_file_async(file)).to_bytes())
-        print_to_console_output(f"Added {file.name}")
+        print_to_console_output(f"Uploaded {file.name} successfully!")
     FILE_UPLOAD.value = ""
 
 
@@ -91,38 +92,42 @@ async def create_client(*_):
     """Create a `TextAnalytics` and a `FormRecognizer` clients in the global Python
     scope with the `PyodideTransport` transport.
     """
-    key = KEY_INPUT.value
-    endpoint = ENDPOINT_INPUT.value
-    client_type = CLIENT_TYPE_SELECT.value
+    try:
+        key = KEY_INPUT.value
+        endpoint = ENDPOINT_INPUT.value
+        client_type = CLIENT_TYPE_SELECT.value
 
-    global client  # pylint: disable=invalid-name, global-statement
-    if client_type == "text-analytics":
-        client = TextAnalyticsClient(
-            endpoint=endpoint,
-            credential=AzureKeyCredential(key),
-            transport=PyodideTransport(),  # pylint: disable=undefined-variable
-        )
-        print_to_console_output("TextAnalytics client created successfully!")
-    elif client_type == "form-recognizer":
-        client = FormRecognizerClient(
-            endpoint=endpoint,
-            credential=AzureKeyCredential(key),
-            transport=PyodideTransport(),  # pylint: disable=undefined-variable
-        )
-        print_to_console_output("FormRecognizer client created successfully!")
-    elif client_type == "blob-storage":
-        client = BlobServiceClient(
-            account_url=endpoint,
-            credential=key,
-            transport=PyodideTransport(),  # pylint: disable=undefined-variable
-        )
-        print_to_console_output("BlobService client created successfully!")
-    else:
-        raise Exception(f"{client_type} is not a valid client type.")
+        global client  # pylint: disable=invalid-name, global-statement
+        if client_type == "text-analytics":
+            client = TextAnalyticsClient(
+                endpoint=endpoint,
+                credential=AzureKeyCredential(key),
+                transport=PyodideTransport(),  # pylint: disable=undefined-variable
+            )
+            print_to_console_output("TextAnalytics client created successfully!")
+        elif client_type == "form-recognizer":
+            client = FormRecognizerClient(
+                endpoint=endpoint,
+                credential=AzureKeyCredential(key),
+                transport=PyodideTransport(),  # pylint: disable=undefined-variable
+            )
+            print_to_console_output("FormRecognizer client created successfully!")
+        elif client_type == "blob-storage":
+            client = BlobServiceClient(
+                account_url=endpoint,
+                credential=key,
+                transport=PyodideTransport(),  # pylint: disable=undefined-variable
+            )
+            print_to_console_output("BlobService client created successfully!")
+        else:
+            raise Exception(f"{client_type} is not a valid client type.")
+    except Exception as exception:
+        print(exception)
 
 
 def tab_listener(event, tab_size=4):
-    """So pressing <Tab> creates four spaces in the code input. Inspired by
+    """So pressing <Tab> creates four spaces in the code input rather than
+    moving into the next element. Inspired by
     https://stackoverflow.com/questions/6637341/use-tab-to-indent-in-textarea
     """
     this = event.currentTarget
@@ -138,7 +143,7 @@ def update_example(*_):
     """Put example code into the code input."""
     example_name = EXAMPLE_SELECT.value
     if example_name:
-        CODE.value = EXAMPLES[example_name]
+        CODE.value = EXAMPLES[example_name].replace("  # type: ignore", "")
 
 
 # Add events to DOM elements.

@@ -8,7 +8,7 @@ blob_client = BlobClient(
     credential=client.credential,  # type: ignore
     max_single_get_size=1,
     max_chunk_get_size=1,
-    transport=PyodideTransport(),  # type: ignore FIXME
+    transport=PyodideTransport(),  # type: ignore
 )
 
 downloader = await blob_client.download_blob()  # type: ignore

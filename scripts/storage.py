@@ -1,7 +1,7 @@
 import asyncio
 import os
 
-from azure.storage.blob.aio import BlobServiceClient, BlobClient
+from azure.storage.blob import BlobServiceClient, BlobClient
 from dotenv import load_dotenv
 
 load_dotenv(override=True)
@@ -22,8 +22,8 @@ async def main():
         # transport=PyodideTransport()
     )
 
-    downloader = await blob_client.download_blob()
-    async for chunk in downloader.chunks():
+    downloader = blob_client.download_blob()
+    for chunk in downloader.chunks():
         print(chunk)
 
 

@@ -10,7 +10,7 @@ for doc in result:
     print("Redacted Text: {}".format(doc.redacted_text))
     for entity in doc.entities:
         print("Entity: {}".format(entity.text))
-        print("\\tCategory: {}".format(entity.category))
-        print("\\tConfidence Score: {}".format(entity.confidence_score))
-        print("\\tOffset: {}".format(entity.offset))
-        print("\\tLength: {}".format(entity.length))
+        print("\tCategory: {}".format(entity.category))
+        print("\tConfidence Score: {}".format(entity.confidence_score))
+        print("\tOffset: {}".format(entity.offset))
+        print("\tLength: {}".format(entity.length))

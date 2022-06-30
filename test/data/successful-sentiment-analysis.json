@@ -1,0 +1,29 @@
+{
+  "documents": [
+    {
+      "id": "0",
+      "sentiment": "positive",
+      "confidenceScores": {
+        "positive": 0.99,
+        "neutral": 0.0,
+        "negative": 0.0
+      },
+      "sentences": [
+        {
+          "sentiment": "positive",
+          "confidenceScores": {
+            "positive": 0.92,
+            "neutral": 0.0,
+            "negative": 0.07
+          },
+          "offset": 0,
+          "length": 67,
+          "text": "The food and service were unacceptable, but the concierge were nice"
+        }
+      ],
+      "warnings": []
+    }
+  ],
+  "errors": [],
+  "modelVersion": "2021-10-01"
+}

@@ -1,9 +1,11 @@
 # pyright: reportMissingImports=false
 from collections.abc import AsyncIterator
 
+from azure.core.exceptions import ServiceRequestError
 from azure.core.pipeline.transport._requests_asyncio import AsyncioRequestsTransport
 from azure.core.rest._http_response_impl_async import AsyncHttpResponseImpl
 from pyodide.http import pyfetch  # pylint: disable=import-error
+from pyodide import JsException  # pylint: disable=import-error
 from requests.structures import CaseInsensitiveDict
 
 
@@ -31,7 +33,12 @@ class PyodideTransport(AsyncioRequestsTransport):
             "keepalive": False,
             **kwargs,
         }
-        response = await pyfetch(endpoint, **init)
+
+        try:
+            response = await pyfetch(endpoint, **init)
+        except JsException as error:
+            raise ServiceRequestError(error, error=error)
+
         headers = CaseInsensitiveDict(response.js_response.headers)
         res = PyodideTransportResponse(
             request=request,

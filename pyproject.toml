@@ -35,4 +35,4 @@ build-backend = "poetry.core.masonry.api"
 asyncio_mode = "strict"
 
 [tool.pylint]
-disable = ["unspecified-encoding"]
+disable = ["unspecified-encoding", "raise-missing-from"]

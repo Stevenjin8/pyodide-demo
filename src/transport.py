@@ -55,22 +55,27 @@ class PyodideTransport(AsyncioRequestsTransport):
 
 
 class PyodideTransportResponse(AsyncHttpResponseImpl):
+    """Async response object for the pyodide transport."""
+
     async def close(self):
         """This is kinda weird but AsyncHttpResponseImpl assumed that
         the internal response is a `requests.Reponse` object (I think).
+
+        Also, you can't really close connections at will using pyfetch.
         """
         self._is_closed = True
 
     async def load_body(self):
+        """Load the body of the response."""
         if self._content is None:
+            # This line can only be called once. Subsequent calls will raise
+            # an `OSError`.
             self._content = await self.internal_response.bytes()
 
 
 class PyodideStreamDownloadGenerator(AsyncIterator):
     """Simple stream download generator that returns the contents of
     a request.
-
-    TODO: support paging (?) or like actually doing stream downloading.
     """
 
     def __init__(self, pipeline, response: PyodideTransportResponse, **__) -> None:
@@ -81,9 +86,11 @@ class PyodideStreamDownloadGenerator(AsyncIterator):
         self.done = False
 
     def __len__(self):
+        """See `__anext__`"""
         return 1
 
     async def __anext__(self):
+        """Assume that all the data we need is in `_internal_response`."""
         if self.done:
             raise StopAsyncIteration()
         self.done = True

@@ -1,6 +1,7 @@
 import initPy from './init.py';
 import transportPy from './transport.py';
 import indexPy from './index.py';
+import requirements from './requirements.txt';
 import { EXAMPLES } from './examples/examples.js';
 
 const output = document.getElementById('output');
@@ -15,6 +16,7 @@ async function main() {
   output.value += 'Loading modules...\n';
 
   await pyodide.registerJsModule('examples', { EXAMPLES });
+  await pyodide.registerJsModule('requirements', { requirements });
   await pyodide.loadPackage('micropip');
   await pyodide.runPythonAsync(initPy); // load external modules
   await pyodide.runPythonAsync(transportPy); // pyodide transports

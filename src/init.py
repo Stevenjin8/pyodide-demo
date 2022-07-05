@@ -3,6 +3,7 @@
 # Bug in azure storage
 import sys
 from types import ModuleType
+from requirements import requirements  # pylint: disable=import-error
 
 import micropip  # pylint: disable=import-error
 
@@ -12,12 +13,6 @@ fake_aiohttp = ModuleType("AioHttp")
 fake_aiohttp.ClientPayloadError = Exception
 sys.modules["aiohttp"] = fake_aiohttp
 
-PACKAGES = [
-    "azure-ai-textanalytics",
-    "azure-ai-formrecognizer",
-    "azure-storage-blob",
-]
-
 # Install packages
 # pylint: disable=await-outside-async
-await micropip.install(PACKAGES, keep_going=True)  # type: ignore
+await micropip.install(filter(bool, requirements.split("\n")), keep_going=True)  # type: ignore

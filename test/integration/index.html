@@ -18,22 +18,28 @@
         await pyodide.loadPackage('micropip');
         await pyodide.runPythonAsync(`
           import micropip
+          from itertools import chain
           from pyodide.http import pyfetch
 
-          PACKAGES = [
-            "python-dotenv",
-            "azure-ai-textanalytics",
-            "azure-storage-blob"
+          TEST_FILES = [
+            "browser_test.py",
+            "async_testing.py",
+            ".env",
+            "/src/transport.py",
+            "/src/requirements.txt",
+            "test_requirements.txt"
           ]
-          TEST_FILES = ["browser_test.py", "async_testing.py", ".env", "/src/transport.py"]
 
-          await micropip.install(PACKAGES)
           for filepath in TEST_FILES:
             res = await pyfetch(filepath, cache="no-cache");
             # get the name of the file
             filename = filepath[filepath.rfind("/") + 1:]
             with open(filename, "wb") as f:
               f.write(await res.bytes())
+
+          with open("requirements.txt") as f, open("test_requirements.txt") as g:
+            requirements = filter(bool, chain(f.read().split("\\n"), g.read().split("\\n")))
+            await micropip.install(requirements)
 
           from dotenv import load_dotenv
           from types import ModuleType

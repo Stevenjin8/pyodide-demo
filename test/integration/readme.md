@@ -1,4 +1,4 @@
-# E2E Testing
+# Integration Testing
 
 The mock tests are a good start, but the main place it can fail is the javascript-python
 interface, which the mock tests mock.
@@ -24,3 +24,13 @@ files to test or new packages, update the `TEST_FILES` and `PACKAGES` variables 
 
 To run the tests, you need a `.env` folder in this directory with your sensitive values.
 see `example-env`. You can then access the values as environment variables using `os.getenv`.
+
+## Dependencies
+
+All all packages defined in `/src/requirements.txt` will be available in the testing environment.
+For additional test-only dependencies, add them to the `test_requirements.txt` file.
+ 
+## Azure Resources
+
+You need your own Text Analytics and Blob Storage accounts to run these tests.
+For more on how to set up these tests, look at the main readme.

@@ -6,15 +6,15 @@ from azure.core.credentials import AzureKeyCredential
 from azure.storage.blob.aio import BlobClient, BlobServiceClient
 from transport import PyodideTransport
 
-from test.integration.async_testing import (
-    AsyncTestSuite,
-)  # pylint: disable=import-error
+# pylint: disable=import-error
+from async_testing import AsyncTestSuite
 
 
 class PyodideTransportIntegrationTestSuite(AsyncTestSuite):
+    """Integration tests for the Pyodide transport."""
+
     text_analytics_client: TextAnalyticsClient
     blob_service_client: BlobServiceClient
-    patcher: _patch_dict
 
     def __init__(
         self,

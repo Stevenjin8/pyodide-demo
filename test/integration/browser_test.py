@@ -6,7 +6,9 @@ from azure.core.credentials import AzureKeyCredential
 from azure.storage.blob.aio import BlobClient, BlobServiceClient
 from transport import PyodideTransport
 
-from async_testing import AsyncTestSuite  # pylint: disable=import-error
+from test.integration.async_testing import (
+    AsyncTestSuite,
+)  # pylint: disable=import-error
 
 
 class PyodideTransportIntegrationTestSuite(AsyncTestSuite):

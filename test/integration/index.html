@@ -25,7 +25,7 @@
             "azure-ai-textanalytics",
             "azure-storage-blob"
           ]
-          TEST_FILES = ["/test/browser_test.py", "/test/async_testing.py", "/test/.env", "/src/transport.py"]
+          TEST_FILES = ["browser_test.py", "async_testing.py", ".env", "/src/transport.py"]
 
           await micropip.install(PACKAGES)
           for filepath in TEST_FILES:
@@ -58,8 +58,8 @@
           test_case = PyodideTransportIntegrationTestSuite(
             text_analytics_endpoint=TEXT_ANALYTICS_ENDPOINT,
             text_analytics_key=TEXT_ANALYTICS_KEY,
-            blob_service_key=STORAGE_KEY,
-            blob_service_endpoint=STORAGE_ENDPOINT,
+            blob_service_key=BLOB_SERVICE_KEY,
+            blob_service_endpoint=BLOB_SERVICE_ENDPOINT,
           )
           await test_case.run()
         `);

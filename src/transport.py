@@ -30,7 +30,6 @@ class PyodideTransport(AsyncioRequestsTransport):
             "verify": kwargs.pop("connection_verify", self.connection_config.verify),
             "cert": kwargs.pop("connection_cert", self.connection_config.cert),
             "allow_redirects": False,
-            "keepalive": False,
             **kwargs,
         }
 

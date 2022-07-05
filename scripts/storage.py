@@ -17,8 +17,8 @@ async def main():
         container_name="tsjinxuanstorage2",
         blob_name="large-file",
         credential=account_client.credential,
-        max_single_get_size=48 * 1024 * 1024,
-        max_chunk_get_size=48 * 1024 * 1024,
+        max_single_get_size=1,
+        max_chunk_get_size=1,
         # transport=PyodideTransport()
     )
 

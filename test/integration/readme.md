@@ -18,7 +18,7 @@ Then on your browser, go to `localhost:<port>/test/integration` and the tests wi
 Add tests in `browser_test.py`. I couldn't get `pytest` or `unittest` to cooperate with me,
 so I made my own little async testing framework (`async_test.py`). If you are creating new
 files to test or new packages, update the `TEST_FILES` and `PACKAGES` variables in
-`index.html`.
+`index.html`, import the test case, and run it.
 
 ## Sensitive values
 

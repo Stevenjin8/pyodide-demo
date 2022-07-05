@@ -1,7 +1,7 @@
 # pyright: reportMissingImports=false
 from collections.abc import AsyncIterator
 
-from azure.core.exceptions import ServiceRequestError
+from azure.core.exceptions import HttpResponseError
 from azure.core.pipeline.transport._requests_asyncio import AsyncioRequestsTransport
 from azure.core.rest._http_response_impl_async import AsyncHttpResponseImpl
 from pyodide.http import pyfetch  # pylint: disable=import-error
@@ -37,7 +37,7 @@ class PyodideTransport(AsyncioRequestsTransport):
         try:
             response = await pyfetch(endpoint, **init)
         except JsException as error:
-            raise ServiceRequestError(error, error=error)
+            raise HttpResponseError(error, error=error)
 
         headers = CaseInsensitiveDict(response.js_response.headers)
         res = PyodideTransportResponse(
@@ -68,8 +68,7 @@ class PyodideTransportResponse(AsyncHttpResponseImpl):
     async def load_body(self):
         """Load the body of the response."""
         if self._content is None:
-            # This line can only be called once. Subsequent calls will raise
-            # an `OSError`.
+            # This line can only be called once. Subsequent calls will raise an `OSError`.
             self._content = await self.internal_response.bytes()
 
 

@@ -7,7 +7,7 @@ from unittest import mock
 import pytest
 from azure.ai.textanalytics.aio import TextAnalyticsClient
 from azure.core.credentials import AzureKeyCredential
-from azure.core.exceptions import ServiceRequestError
+from azure.core.exceptions import HttpResponseError
 from azure.storage.blob._shared.authentication import SharedKeyCredentialPolicy
 from azure.storage.blob.aio import BlobClient, BlobServiceClient
 
@@ -19,7 +19,7 @@ sys.modules["pyodide.http"] = MOCK_PYODIDE_HTTP
 MOCK_PYODIDE_MODULE = mock.Mock()
 MOCK_PYODIDE_MODULE.JsException = Exception
 sys.modules["pyodide"] = MOCK_PYODIDE_MODULE
-
+# patch dict
 import transport
 
 PLACEHOLDER_ENDPOINT = "https://my-resource-group.cognitiveservices.azure.com/"
@@ -189,5 +189,5 @@ async def test_js_exception():
         endpoint=PLACEHOLDER_ENDPOINT,
         transport=transport.PyodideTransport(),
     )
-    with pytest.raises(ServiceRequestError):
+    with pytest.raises(HttpResponseError):
         await client.analyze_sentiment(documents, show_opinion_mining=False)

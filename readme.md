@@ -55,7 +55,7 @@ Under your desired service, create a rule with the following values
 
 | Allowed origins | Allowed methods | Allowed headers | Exposed headers | Max age |
 |-----------------|-----------------|-----------------|-----------------|---------|
-| \*              | All             | \*              | See below       | 3600    |
+| `\*`            | All             | `\*`            | See below       | `3600`   |
 
 For exposed headers, put
 

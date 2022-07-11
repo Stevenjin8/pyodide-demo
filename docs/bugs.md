@@ -1,1 +1,3 @@
 - `BlobServiceClient` can take a key (in string form) as its credential, but it cannot take an `AzureKeyCredentials` object.
+- The whole pytest charade
+- why is requests required for az core? (see setup.py file.)

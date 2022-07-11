@@ -5,6 +5,7 @@ import pyodide
 from azure.ai.formrecognizer.aio import FormRecognizerClient
 from azure.ai.textanalytics.aio import TextAnalyticsClient
 from azure.core.credentials import AzureKeyCredential
+from azure.core.pipeline.transport._pyodide import PyodideTransport
 from azure.storage.blob.aio import BlobServiceClient
 
 from examples import EXAMPLES
@@ -19,6 +20,7 @@ ENDPOINT_INPUT = get_element_by_id("endpoint")
 CLIENT_TYPE_SELECT = get_element_by_id("client-type")
 FILE_UPLOAD = get_element_by_id("file-upload")
 EXAMPLE_SELECT = get_element_by_id("example")
+TOGGLE_DOCS = get_element_by_id("toggle-docs")
 
 client = None  # pylint: disable=invalid-name
 
@@ -146,11 +148,21 @@ def update_example(*_):
         CODE.value = EXAMPLES[example_name].replace("  # type: ignore", "")
 
 
+def toggle_docs(*_):
+    """Toggle documentation."""
+    for element in js.document.getElementsByClassName("docs"):
+        if element.style.display != "none":
+            element.style.display = "none"
+        else:
+            element.style.display = "block"
+
+
 # Add events to DOM elements.
 get_element_by_id("code").addEventListener(
     "keydown", pyodide.create_proxy(tab_listener)
 )
 get_element_by_id("run").onclick = evaluate_python
+get_element_by_id("toggle-help").onclick = toggle_docs
 get_element_by_id("clear").onclick = clear_console_output
 get_element_by_id("upload").onclick = save_files
 get_element_by_id("create-client").onclick = create_client

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.20.0/full/pyodide.js"></script>
+</head>
+
+<body onload="main()">
+  <script>
+    async function main() {
+      let pyodide = await loadPyodide();
+
+      /**
+       * We define a super simple async function and a synchronous function
+       * That calls the async function in an event loop
+       */
+      await pyodide.runPythonAsync(`
+        import asyncio
+
+        async def hello():
+            return "hello"
+        def call_hello():
+            loop = asyncio.get_event_loop()
+            return loop.run_until_complete(hello())
+      `)
+      /**
+       * Now, we call the synchronous function using `pyodide.runPython{async}`
+       */
+      await pyodide.runPythonAsync(`
+          print("In \`pyodide.runPythonAsync\`")
+          print(type(call_hello()))
+      `)
+      pyodide.runPython(`
+          print("In \`pyodide.runPython\`")
+          print(type(call_hello()))
+          print("*" * 8)
+      `)
+      /**
+       * We see that in both cases (at least on Edge), we get that the
+       * return type is a task.
+       */
+      /**
+       * Now the questions is whether the functions are running at all?
+       * We can test this by having a function with side effects.
+       */
+      await pyodide.runPython(`
+        async def side_effect():
+            print("Side effect")
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(side_effect())
+        print("Done running loop!")
+      `)
+      /**
+       * We see that "Done running loop" was printed __before__
+       * "Side effect". It seems like the loop is finishing before the
+       * tasks.
+       */
+    }
+  </script>
+</body>
+</html>

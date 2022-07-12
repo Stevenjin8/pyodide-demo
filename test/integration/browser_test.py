@@ -3,8 +3,8 @@ from uuid import uuid4
 
 from azure.ai.textanalytics.aio import TextAnalyticsClient
 from azure.core.credentials import AzureKeyCredential
+from azure.core.pipeline.transport._pyodide import PyodideTransport
 from azure.storage.blob.aio import BlobClient, BlobServiceClient
-from transport import PyodideTransport
 
 # pylint: disable=import-error
 from async_testing import AsyncTestSuite

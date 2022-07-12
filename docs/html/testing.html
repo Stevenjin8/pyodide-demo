@@ -1,0 +1,45 @@
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.20.0/full/pyodide.js"></script>
+  </head>
+  <body>
+    <code id="output"></code>
+    <script>
+      async function main() {
+        output = document.getElementById('output');
+
+        pyodide = await loadPyodide({
+          stdout: (x) =>
+            (output.innerHTML += x.replace(/\s/, '&nbsp') + '<br />'),
+          stderr: (x) =>
+            (output.innerHTML += x.replace(/\s/, '&nbsp') + '<br />'),
+        });
+        await pyodide.loadPackage('micropip');
+        await pyodide.runPythonAsync(`
+          import micropip
+          from itertools import chain
+          from pyodide.http import pyfetch
+
+          TEST_FILES = [
+            "test_sync.py",
+            "test_async.py",
+          ]
+
+          for filepath in TEST_FILES:
+            res = await pyfetch(filepath, cache="no-cache");
+            # get the name of the file
+            filename = filepath[filepath.rfind("/") + 1:]
+            with open(filename, "wb") as f:
+              f.write(await res.bytes())
+
+          await micropip.install(["pytest", "pytest-asyncio"])
+          import pytest
+
+          pytest.main(["--color", "no"])
+        `);
+      }
+      main();
+    </script>
+  </body>
+</html>

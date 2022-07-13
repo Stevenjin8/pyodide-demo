@@ -1,5 +1,7 @@
 # pyright: reportMissingImports=false, reportUndefinedVariable=false
 # pylint: disable=import-error, no-name-in-module
+import traceback
+
 import js
 import pyodide
 from azure.ai.formrecognizer.aio import FormRecognizerClient
@@ -86,7 +88,7 @@ async def evaluate_python(*_):
         if content is not None:
             print_to_console_output(content)
     except Exception as exception:  # pylint: disable=broad-except
-        print_to_console_output(exception)
+        print_to_console_output(traceback.format_exc())
     toggle_inputs(False)
 
 

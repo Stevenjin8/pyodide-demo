@@ -7,7 +7,7 @@ import pyodide
 from azure.ai.formrecognizer.aio import FormRecognizerClient
 from azure.ai.textanalytics.aio import TextAnalyticsClient
 from azure.core.credentials import AzureKeyCredential
-from azure.core.pipeline.transport._pyodide import PyodideTransport
+from azure.core.pipeline.transport.pyodide import PyodideTransport
 from azure.storage.blob.aio import BlobServiceClient
 
 from examples import EXAMPLES

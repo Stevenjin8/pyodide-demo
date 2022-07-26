@@ -1,4 +1,4 @@
-https://tsjinxuanstorage2.blob.core.windows.net/pyodide/azure_core-1.24.3-py3-none-any.whl
+azure-storage-blob
 azure-ai-textanalytics
 azure-ai-formrecognizer
-azure-storage-blob
+https://tsjinxuanstorage2.blob.core.windows.net/pyodide/azure_core-1.25.0-py3-none-any.whl

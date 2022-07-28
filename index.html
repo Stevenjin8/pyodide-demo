@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="https://pyscript.net/alpha/pyscript.css" />
+    <script defer src="https://pyscript.net/alpha/pyscript.js"></script>
+    <title>PyScript REPL</title>
+    <style>
+      .user-input { 
+        border: 1px solid gray;
+        padding-left: 1px;
+        padding-right: 1px;
+      }
+    </style>
+  </head>
+
+
+  <body>
+    <p class="docs">
+      You can execute any Python code. Just enter something in the input box and
+      click the button. To play around with a <code>TextAnalytics</code> or
+      <code>FormRecognizer</code> client, enter you resource key and endpoint
+      and select your resource type. Then, press <code>create client</code>.
+      Then client will be available under the <code>client</code> name.
+    </p>
+    <p class="docs">
+      To see an example, choose an example from the examples dropdown.
+    </p>
+    <p class="docs">
+      To access files in your local file system, you must first upload them to
+      the virtual file system. For example, if you have a file named
+      <code>receipt.jpeg</code>
+      on your computer, select it using the Choose Files input and press upload.
+      Now, you can access the file as if it were in your working directory. See
+      the Form Recognizer example.
+    </p>
+    <p class="docs">
+      See
+      <a
+        href="https://ms.portal.azure.com/#create/Microsoft.CognitiveServicesTextAnalytics"
+        >this</a
+      >
+      link to create a Text Analytics resource and
+      <a
+        href="https://ms.portal.azure.com/#create/Microsoft.CognitiveServicesFormRecognizer"
+        >here</a
+      >
+      to create a Form Recognizer resource. You can find the key and endpoint
+      under the "Keys and Endpoint" tab of each resource.
+    </p>
+    <br />
+    <button class="user-input" id="toggle-help">Toggle docs</button>
+    <label for="endpoint">Endpoint: </label>
+    <input class="user-input" type="text" id="endpoint" />
+    <label for="key">Key: </label>
+    <input type="password" id="key" class="user-input" />
+    <label for="client-type">Client type: </label>
+    <select name="client-type" id="client-type" class="user-input">
+      <option value="text-analytics">Text Analytics</option>
+      <option value="form-recognizer">Form Recognizer</option>
+      <!-- <option value="blob-storage">Blob Storage</option> -->
+    </select>
+    <button class="user-input" id="create-client">
+      Create Client
+    </button>
+    <br />
+    <code>
+      <textarea
+        id="code"
+        class="user-input"
+        spellcheck="false"
+        style="width: 100%"
+        rows="12"
+      ></textarea>
+    </code>
+
+    <br />
+    <button id="run" class="user-input">Run</button>
+    <button id="clear" class="user-input">Clear Output</button>
+    <label for="example">Example: </label>
+    <select name="example" class="user-input" id="example">
+      <option value="sentiment">Sentiment Analysis</option>
+      <option value="language">Language Detection</option>
+      <option value="health">Health</option>
+      <option value="pii">PII</option>
+      <option value="receipts">Form Recognizer</option>
+    </select>
+    <input type="file" class="user-input" id="file-upload" multiple />
+    <button id="upload" class="user-input">Upload</button>
+
+    <br />
+    <code>
+      <textarea
+        spellcheck="false"
+        id="output"
+        style="width: 100%"
+        rows="12"
+        disabled
+      ></textarea>
+    </code>
+
+    <py-script>
+      import sys
+      from types import ModuleType
+      fake_aiohttp = ModuleType("AioHttp")
+      fake_aiohttp.ClientPayloadError = Exception
+      sys.modules["aiohttp"] = fake_aiohttp
+    </py-script>
+    <py-env>
+      - 'https://tsjinxuanstorage2.blob.core.windows.net/pyodide/azure_core-1.25.0-py3-none-any.whl'
+      - azure-storage-blob
+      - azure-ai-textanalytics
+      - azure-ai-formrecognizer
+    </py-env>
+    <py-script id="examples-py">
+    ################################################################################
+    # HEALTH #######################################################################
+    ################################################################################
+
+    HEALTH_EXAMPLE = """
+    documents = ["Patient needs to take 50 mg of ibuprofen."]
+
+    poller = await client.begin_analyze_healthcare_entities(documents)  # type: ignore
+    result = await poller.result()  # type: ignore
+    docs = [doc async for doc in result if not doc.is_error]  # type: ignore
+
+    for idx, doc in enumerate(docs):
+        for entity in doc.entities:
+            print("Entity: {}".format(entity.text))
+            print("...Normalized Text: {}".format(entity.normalized_text))
+            print("...Category: {}".format(entity.category))
+            print("...Subcategory: {}".format(entity.subcategory))
+            print("...Offset: {}".format(entity.offset))
+            print("...Confidence score: {}".format(entity.confidence_score))
+        for relation in doc.entity_relations:
+            print(
+                "Relation of type: {} has the following roles".format(
+                    relation.relation_type
+                ),
+            )
+            for role in relation.roles:
+                print(
+                    "...Role '{}' with entity '{}'".format(role.name, role.entity.text),
+                )
+        print("------------------------------------------")"""
+
+    ################################################################################
+    # LANGUAGE DETECTION ###########################################################
+    ################################################################################
+
+    LANGUAGE_DETECTION_EXAMPLE = """
+    documents = ["Ce document est rédigé en Français."]
+    response = await client.detect_language(documents = documents, country_hint = 'us')[0]
+    print("Language: ", response.primary_language.name)"""
+
+    ################################################################################
+    # PII DETECTION ################################################################
+    ################################################################################
+
+    PII_EXAMPLE = """
+    documents = [
+        "The employee's SSN is 859-98-0987.",
+        "The employee's phone number is 555-555-5555.",
+    ]
+    response = await client.recognize_pii_entities(documents, language="en")  # type: ignore
+    result = [doc for doc in response if not doc.is_error]
+    for doc in result:
+        print("Redacted Text: {}".format(doc.redacted_text))
+        for entity in doc.entities:
+            print("Entity: {}".format(entity.text))
+            print("\tCategory: {}".format(entity.category))
+            print("\tConfidence Score: {}".format(entity.confidence_score))
+            print("\tOffset: {}".format(entity.offset))
+            print("\tLength: {}".format(entity.length))"""
+
+    ################################################################################
+    # PII DETECTION ################################################################
+    ################################################################################
+
+    RECEIPTS_EXAMPLE = """
+    with open("receipt.jpeg", "rb") as f:
+        data = f.read()
+    poller = await client.begin_recognize_receipts(data)  # type: ignore
+    result = (await poller.result())[0]  # type: ignore
+    for k, v in result.fields.items():
+        print(k, ":", v.value_data.text if v.value_data else "-")"""
+
+    ################################################################################
+    # SENTIMENT ANALYSIS ###########################################################
+    ################################################################################
+
+    SENTIMENT_ANALYSIS_EXAMPLE = """
+    documents = ["The food and service were unacceptable, but the concierge were nice"]
+
+    result = await client.analyze_sentiment(documents, show_opinion_mining=True)  # type: ignore
+    doc_result = [doc for doc in result if not doc.is_error]
+
+    positive_mined_opinions = []
+    mixed_mined_opinions = []
+    negative_mined_opinions = []
+
+    for document in doc_result:
+        print("Document Sentiment: {}".format(document.sentiment))
+        print(
+            "Overall scores: positive={0:.2f}; neutral={1:.2f}; negative={2:.2f} \\n".format(
+                document.confidence_scores.positive,
+                document.confidence_scores.neutral,
+                document.confidence_scores.negative,
+            )
+        )
+        for sentence in document.sentences:
+            print("Sentence: {}".format(sentence.text))
+            print("Sentence sentiment: {}".format(sentence.sentiment))
+            print(
+                "Sentence score:\\nPositive={0:.2f}\\nNeutral={1:.2f}\\nNegative={2:.2f}\\n".format(
+                    sentence.confidence_scores.positive,
+                    sentence.confidence_scores.neutral,
+                    sentence.confidence_scores.negative,
+                ),
+            )
+            print("\\n")
+        print("\\n")"""
+
+    ################################################################################
+    # STORAGE ######################################################################
+    ################################################################################
+
+    STORAGE_EXAMPLE = """blob_client = BlobClient(
+        account_url=client.url,  # type: ignore
+        container_name="<your container name>",
+        blob_name="<your blob name>",
+        credential=client.credential,  # type: ignore
+        transport=PyodideTransport(),  # type: ignore
+    )
+
+    downloader = await blob_client.download_blob()  # type: ignore
+    async for chunk in downloader.chunks():  # type: ignore
+        print(chunk)"""
+
+    EXAMPLES = {
+        "health": HEALTH_EXAMPLE,
+        "language": LANGUAGE_DETECTION_EXAMPLE,
+        "pii": PII_EXAMPLE,
+        "receipts": RECEIPTS_EXAMPLE,
+        "sentiment": SENTIMENT_ANALYSIS_EXAMPLE,
+        "storage": STORAGE_EXAMPLE,
+    }
+
+    </py-script>
+    <py-script>
+    import traceback
+
+    import js
+    import pyodide
+    from azure.ai.formrecognizer.aio import FormRecognizerClient
+    from azure.ai.textanalytics.aio import TextAnalyticsClient
+    from azure.core.credentials import AzureKeyCredential
+    from azure.core.pipeline.transport.pyodide import PyodideTransport
+    from azure.storage.blob.aio import BlobServiceClient
+
+    get_element_by_id = js.document.getElementById
+    USER_INPUT_CLASS_NAME = "user-input"
+    CONSOLE_OUTPUT = get_element_by_id("output")
+    CODE = get_element_by_id("code")
+    KEY_INPUT = get_element_by_id("key")
+    ENDPOINT_INPUT = get_element_by_id("endpoint")
+    CLIENT_TYPE_SELECT = get_element_by_id("client-type")
+    FILE_UPLOAD = get_element_by_id("file-upload")
+    EXAMPLE_SELECT = get_element_by_id("example")
+    TOGGLE_DOCS = get_element_by_id("toggle-docs")
+
+    client = None  # pylint: disable=invalid-name
+
+    # need to overwrite the traditional print so it prints to the terminal
+    class OutputFile:
+      def write(self, x, *_, **__):
+        CONSOLE_OUTPUT.value += str(x)
+      
+      def flush(self):
+        pass
+    
+    REAL_PRINT = print
+
+    # The first time I have intentionally had a mutable default argument
+    def print(*objects, sep=" ", end="\n", file=OutputFile(), flush=False):
+      REAL_PRINT(*objects, sep=sep, end=end, file=file, flush=flush)
+
+    sys.stdout = OutputFile()
+
+    def read_file_async(file):
+      """Return a promise that resolves to the contents of a file.
+      See:
+      https://stackoverflow.com/questions/34495796/javascript-promises-with-filereader
+      """
+
+      def callback(resolve, reject):
+        reader = js.FileReader.new()
+        reader.onload = lambda *_: resolve(reader.result)
+        reader.onerror = reject
+        reader.readAsArrayBuffer(file)
+
+      return js.Promise.new(pyodide.create_once_callable(callback))
+
+
+    async def save_files(*_):
+      """Save file to virtual file system from the file upload input."""
+      files = FILE_UPLOAD.files.object_values()
+      for file in files:
+        with open(file.name, "wb") as f:
+          f.write((await read_file_async(file)).to_bytes())
+        print_to_console_output(f"Uploaded {file.name} successfully!")
+      FILE_UPLOAD.value = ""
+
+
+    def toggle_inputs(value=None):
+      """Toggle user inputs on and off. Note that `value` sets the `disabled` attribute
+      of inputs, so to enable all inputs, you would call `toggle_inputs(False)`.
+      """
+      for element in js.document.getElementsByClassName(USER_INPUT_CLASS_NAME):
+        element.disabled = not element.disabled if value is None else value
+
+
+    def add_code_to_console_output(code: str):
+      """Add nicely formatted code to console output."""
+      code = "\n... ".join(code.strip().split("\n"))
+      CONSOLE_OUTPUT.value += "".join((">>> ", code, "\n"))
+
+
+    def print_to_console_output(content: any):
+      """print content to console output and scroll to the bottom."""
+      content = str(content)
+      CONSOLE_OUTPUT.value = "".join((CONSOLE_OUTPUT.value, content, "\n"))
+      CONSOLE_OUTPUT.scrollTop = CONSOLE_OUTPUT.scrollHeight
+
+
+    def clear_console_output(*_):
+      """Clears the console output"""
+      CONSOLE_OUTPUT.value = ""
+
+
+    async def evaluate_python(*_):
+      """Evaluates code form the code input and writes to console output."""
+      toggle_inputs(True)
+      code = CODE.value
+      add_code_to_console_output(code)
+      try:
+        content = await pyodide.eval_code_async(code, globals=globals())
+        if content is not None:
+          print_to_console_output(content)
+      except Exception as exception:  # pylint: disable=broad-except
+        print_to_console_output(traceback.format_exc())
+      toggle_inputs(False)
+
+
+    async def create_client(*_):
+      """Create a `TextAnalytics` and a `FormRecognizer` clients in the global Python
+      scope with the `PyodideTransport` transport.
+      """
+      try:
+        key = KEY_INPUT.value
+        endpoint = ENDPOINT_INPUT.value
+        client_type = CLIENT_TYPE_SELECT.value
+
+        global client  # pylint: disable=invalid-name, global-statement
+        if client_type == "text-analytics":
+          client = TextAnalyticsClient(
+            endpoint=endpoint,
+            credential=AzureKeyCredential(key),
+            transport=PyodideTransport(),  # pylint: disable=undefined-variable
+          )
+          print_to_console_output("TextAnalytics client created successfully!")
+        elif client_type == "form-recognizer":
+          client = FormRecognizerClient(
+            endpoint=endpoint,
+            credential=AzureKeyCredential(key),
+            transport=PyodideTransport(),  # pylint: disable=undefined-variable
+          )
+          print_to_console_output("FormRecognizer client created successfully!")
+        elif client_type == "blob-storage":
+          client = BlobServiceClient(
+            account_url=endpoint,
+            credential=key,
+            transport=PyodideTransport(),  # pylint: disable=undefined-variable
+          )
+          print_to_console_output("BlobService client created successfully!")
+        else:
+          raise Exception(f"{client_type} is not a valid client type.")
+      except Exception as exception:
+        print(exception)
+
+
+    def tab_listener(event, tab_size=4):
+      """So pressing <Tab> creates four spaces in the code input rather than
+      moving into the next element. Inspired by
+      https://stackoverflow.com/questions/6637341/use-tab-to-indent-in-textarea
+      """
+      this = event.currentTarget
+      if event.key == "Tab":
+        event.preventDefault()
+        start = this.selectionStart
+        end = this.selectionEnd
+        this.value = this.value[:start] + " " * tab_size + this.value[end:]
+        this.selectionStart = this.selectionEnd = start + tab_size
+
+
+    def update_example(*_):
+      """Put example code into the code input."""
+      example_name = EXAMPLE_SELECT.value
+      if example_name:
+        CODE.value = EXAMPLES[example_name].replace("  # type: ignore", "")
+
+
+    def toggle_docs(*_):
+      """Toggle documentation."""
+      for element in js.document.getElementsByClassName("docs"):
+        if element.style.display != "none":
+          element.style.display = "none"
+        else:
+          element.style.display = "block"
+
+
+    # Add events to DOM elements.
+    get_element_by_id("code").addEventListener(
+      "keydown", pyodide.create_proxy(tab_listener)
+    )
+    get_element_by_id("run").onclick = evaluate_python
+    get_element_by_id("toggle-help").onclick = toggle_docs
+    get_element_by_id("clear").onclick = clear_console_output
+    get_element_by_id("upload").onclick = save_files
+    get_element_by_id("create-client").onclick = create_client
+    EXAMPLE_SELECT.onchange = update_example
+    </py-script>
+  </body>
+</html>

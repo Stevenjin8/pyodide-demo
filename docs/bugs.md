@@ -60,6 +60,10 @@ yield _pyodide
 but in the latter case, I ended up with `_pyodide = 'pyodide'`. Yes, you read that
 right. It turned into a string.
 
+### Solution
+
+Turns out that this is how the `__getattr__` of that `__init__.py` file is defined.
+
 ## Async functions not awaiting properly
 
 This one was a head scratcher. See `html/async-bug-example` for more details.

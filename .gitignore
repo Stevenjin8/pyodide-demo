@@ -1,9 +1,7 @@
 .DS_Store
-/*dist
 .env
-/secrets
 **secret**
-node_modules
 /.venv
-**/__pycache__
-.pytest_cache
+.vscode
+pyproject.toml
+poetry.lock

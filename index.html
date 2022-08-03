@@ -148,7 +148,7 @@
 
     LANGUAGE_DETECTION_EXAMPLE = """
     documents = ["Ce document est rédigé en Français."]
-    response = await client.detect_language(documents = documents, country_hint = 'us')[0]
+    response = (await client.detect_language(documents = documents, country_hint = 'us'))[0]
     print("Language: ", response.primary_language.name)"""
 
     ################################################################################

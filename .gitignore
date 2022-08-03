@@ -1,7 +1,12 @@
+# Dot files
 .DS_Store
+.vscode
+.venv
+
+# Sensitive values
 .env
 **secret**
-/.venv
-.vscode
+
+# Poetry
 pyproject.toml
 poetry.lock

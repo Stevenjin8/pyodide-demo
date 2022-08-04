@@ -8,7 +8,8 @@ Just open `index.html` in your browser
 
 ## Dependencies
 
-Add them the the `<py-env>` tag in `index.html`.
+Add them the the `<py-env>` tag in `index.html`. Note that this demo is using
+a branch of `azure-core` hosted in Azure blob storage because Pyodide-related classes are not in `main`.
 
 ## Azure Resources
 
@@ -23,3 +24,5 @@ Under your desired service, create a rule with the following values
 For exposed headers, put
 
 > Server,Content-Range,ETag,Last-Modified,Accept-Ranges,x-ms-*
+
+> **IMPORTANT**: If you want to host a custom wheel of `azure-core` in Azure blob storage and access it via Pyodide, you **must** also add the above CORS rule to the corresponding storage account.

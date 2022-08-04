@@ -105,10 +105,10 @@
       sys.modules["aiohttp"] = fake_aiohttp
     </py-script>
     <py-env>
-      - 'https://tsjinxuanstorage2.blob.core.windows.net/pyodide/azure_core-1.25.0-py3-none-any.whl'
       - azure-storage-blob
       - azure-ai-textanalytics
       - azure-ai-formrecognizer
+      - 'https://pyodidedemo.blob.core.windows.net/wheel/azure_core-1.25.0-py3-none-any.whl'
     </py-env>
     <py-script id="examples-py">
     ################################################################################
@@ -253,7 +253,7 @@
     from azure.ai.formrecognizer.aio import FormRecognizerClient
     from azure.ai.textanalytics.aio import TextAnalyticsClient
     from azure.core.credentials import AzureKeyCredential
-    from azure.core.pipeline.transport.pyodide import PyodideTransport
+    from azure.core.pipeline.transport import PyodideTransport
     from azure.storage.blob.aio import BlobServiceClient
 
     get_element_by_id = js.document.getElementById
